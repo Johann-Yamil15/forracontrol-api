@@ -14,4 +14,9 @@ public interface IProductoService
     Task<bool> ActualizarPresentacionAsync(int id, ActualizarPresentacionRequest request);
     Task<bool> EliminarPresentacionAsync(int id);
     Task<int?> AgregarStockAsync(int id, int cantidad);
+
+    /// Valida, sanitiza (quita EXIF/GPS) y redimensiona la imagen, la guarda en
+    /// disco y actualiza el producto. Devuelve la ruta relativa (ej. "/uploads/productos/xxx.jpg")
+    /// o null si el producto no existe.
+    Task<string?> GuardarImagenAsync(int idProducto, Stream contenido);
 }

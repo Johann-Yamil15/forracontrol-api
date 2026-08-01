@@ -1,6 +1,7 @@
 using ForraControl.API.Interfaces;
 using ForraControl.API.Models.Dtos.Productos;
 using Microsoft.AspNetCore.Mvc;
+using SixLabors.ImageSharp;
 
 namespace ForraControl.API.Controllers.Admin;
 
@@ -62,5 +63,43 @@ public class ProductosAdminController(IProductoService productos) : ApiControlle
             return Created(new { id });
         }
         catch (Exception ex) { return Fail(ex.Message, StatusCodes.Status500InternalServerError); }
+    }
+
+    private const long MaxImagenBytes = 5 * 1024 * 1024; // 5 MB
+
+    [HttpPost("{id:int}/imagen")]
+    [RequestSizeLimit(MaxImagenBytes + 1024 * 1024)] // margen para overhead del multipart
+    public async Task<IActionResult> SubirImagen(int id, IFormFile? imagen)
+    {
+        if (imagen == null || imagen.Length == 0)
+            return Fail("No se recibió ninguna imagen");
+        if (imagen.Length > MaxImagenBytes)
+            return Fail("La imagen no debe superar 5 MB");
+
+        try
+        {
+            await using var stream = imagen.OpenReadStream();
+            var rutaRelativa = await productos.GuardarImagenAsync(id, stream);
+            if (rutaRelativa == null)
+                return Fail("Producto no encontrado", StatusCodes.Status404NotFound);
+
+            return Ok(new { imagenUrl = rutaRelativa });
+        }
+        catch (UnknownImageFormatException)
+        {
+            return Fail("El archivo no es una imagen válida");
+        }
+        catch (InvalidImageContentException)
+        {
+            return Fail("El archivo está dañado o no es una imagen válida");
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Fail(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return Fail(ex.Message, StatusCodes.Status500InternalServerError);
+        }
     }
 }

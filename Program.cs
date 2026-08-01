@@ -1,8 +1,10 @@
 using System.Text.Json.Serialization;
+using ForraControl.API.Common;
 using ForraControl.API.Data;
 using ForraControl.API.Interfaces;
 using ForraControl.API.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -70,6 +72,18 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseCors("AllowAll");
+
+// ── Imágenes subidas (productos) ────────────────────────────────────────
+// En Railway, Uploads__Path debe apuntar a un Volume montado (ej. /data/uploads)
+// para que las imágenes sobrevivan reinicios/redeploys — sin eso, el disco del
+// contenedor es efímero y se pierden.
+var uploadsRoot = UploadPaths.GetRoot(app.Configuration);
+Directory.CreateDirectory(Path.Combine(uploadsRoot, "productos"));
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(uploadsRoot),
+    RequestPath = "/uploads",
+});
 
 app.UseAuthorization();
 app.MapControllers();

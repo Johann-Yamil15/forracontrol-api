@@ -11,3 +11,6 @@ obj/
 ## OS
 .DS_Store
 Thumbs.db
+
+# Imágenes subidas en desarrollo local (no se versionan)
+/uploads/
