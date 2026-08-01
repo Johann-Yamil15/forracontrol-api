@@ -23,8 +23,28 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // ── Base de datos (PostgreSQL) ──────────────────────────────────────────
+var connectionString = builder.Configuration.GetConnectionString("Database");
+
+Console.WriteLine(string.IsNullOrEmpty(connectionString)
+    ? "[Startup] ConnectionStrings:Database está VACÍA — revisa la variable de entorno ConnectionStrings__Database en Railway."
+    : $"[Startup] ConnectionStrings:Database configurada (longitud={connectionString.Length}).");
+
+if (string.IsNullOrEmpty(connectionString))
+{
+    var relacionadas = Environment.GetEnvironmentVariables().Keys.Cast<string>()
+        .Where(k => k.Contains("Connection", StringComparison.OrdinalIgnoreCase))
+        .ToList();
+    Console.WriteLine(relacionadas.Count > 0
+        ? $"[Startup] Variables de entorno relacionadas encontradas: {string.Join(", ", relacionadas)}"
+        : "[Startup] No se encontró ninguna variable de entorno que contenga 'Connection'. La variable no está llegando al contenedor.");
+
+    throw new InvalidOperationException(
+        "ConnectionStrings:Database no está configurada. Define la variable de entorno " +
+        "ConnectionStrings__Database (doble guion bajo) en el servicio de Railway que corre esta imagen.");
+}
+
 builder.Services.AddDbContext<ForraDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("Database"))
+    options.UseNpgsql(connectionString)
            .UseSnakeCaseNamingConvention());
 
 // ── Inyección de dependencias ───────────────────────────────────────────
