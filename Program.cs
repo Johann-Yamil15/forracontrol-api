@@ -76,14 +76,25 @@ app.UseCors("AllowAll");
 // ── Imágenes subidas (productos) ────────────────────────────────────────
 // En Railway, Uploads__Path debe apuntar a un Volume montado (ej. /data/uploads)
 // para que las imágenes sobrevivan reinicios/redeploys — sin eso, el disco del
-// contenedor es efímero y se pierden.
+// contenedor es efímero y se pierden. Si la carpeta no se puede crear/escribir
+// (permisos del Volume, disco lleno, etc.) se loguea y se sigue arrancando —
+// un problema de subida de imágenes no debe tumbar el resto de la API.
 var uploadsRoot = UploadPaths.GetRoot(app.Configuration);
-Directory.CreateDirectory(Path.Combine(uploadsRoot, "productos"));
-app.UseStaticFiles(new StaticFileOptions
+try
 {
-    FileProvider = new PhysicalFileProvider(uploadsRoot),
-    RequestPath = "/uploads",
-});
+    Directory.CreateDirectory(Path.Combine(uploadsRoot, "productos"));
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(uploadsRoot),
+        RequestPath = "/uploads",
+    });
+    Console.WriteLine($"[Startup] Carpeta de uploads lista en: {uploadsRoot}");
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"[Startup] No se pudo preparar la carpeta de uploads ({uploadsRoot}): {ex.Message}. " +
+        "La subida de imágenes de productos no funcionará hasta que se resuelva, pero el resto de la API sigue disponible.");
+}
 
 app.UseAuthorization();
 app.MapControllers();
