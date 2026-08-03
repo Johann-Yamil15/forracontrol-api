@@ -16,7 +16,13 @@ public class VentaItemRequest
     public int IdPresentacion { get; set; }
     public string? NombreProducto { get; set; }
     public string? Unidad { get; set; }
-    public decimal Tamano { get; set; }
+
+    // El cliente Flutter manda una descripción de texto (ej. "Tonelada", "50 kg"),
+    // no un número — y el servidor no la usa para registrar la venta (el tamaño
+    // real se obtiene por join con Presentacion al leer el historial), así que
+    // se acepta como string en vez de decimal para no romper el model binding.
+    public string? Tamano { get; set; }
+
     public int Cantidad { get; set; }
     public decimal PrecioUnitario { get; set; }
     public decimal PrecioEfectivo { get; set; }
