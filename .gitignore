@@ -14,3 +14,6 @@ Thumbs.db
 
 # Imágenes subidas en desarrollo local (no se versionan)
 /uploads/
+
+# Valores reales (contraseñas, cadenas de conexión) — solo para referencia local
+SECRETS.local.md
