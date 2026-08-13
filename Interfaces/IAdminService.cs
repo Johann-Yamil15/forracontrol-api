@@ -5,6 +5,6 @@ namespace ForraControl.API.Interfaces;
 public interface IAdminService
 {
     Task<DashboardDto> ObtenerDashboardAsync();
-    Task<ReporteDto> ObtenerReporteAsync(string? periodo);
-    Task<ReporteCompletoDto> ObtenerReporteCompletoAsync(string? periodo);
+    Task<ReporteDto> ObtenerReporteAsync(DateTime desde, DateTime hasta);
+    Task<ReporteCompletoDto> ObtenerReporteCompletoAsync(DateTime desde, DateTime hasta);
 }

@@ -95,16 +95,10 @@ public class AdminService(ForraDbContext db) : IAdminService
         };
     }
 
-    public async Task<ReporteDto> ObtenerReporteAsync(string? periodo)
+    public async Task<ReporteDto> ObtenerReporteAsync(DateTime desde, DateTime hasta)
     {
-        var hoy = DateTime.Today;
-        DateTime inicio = periodo?.ToLower() switch
-        {
-            "semana" => hoy.AddDays(-6),
-            "mes" => new DateTime(hoy.Year, hoy.Month, 1),
-            _ => hoy
-        };
-        var fin = hoy.AddDays(1);
+        var inicio = desde.Date;
+        var fin = hasta.Date.AddDays(1);
 
         var ventas = await db.Ventas
             .Include(v => v.Cliente)
@@ -115,11 +109,12 @@ public class AdminService(ForraDbContext db) : IAdminService
 
         return new ReporteDto
         {
-            Periodo = periodo ?? "hoy",
+            Desde = inicio,
+            Hasta = hasta.Date,
             TotalVentas = ventas.Sum(v => v.TotalFinal),
             DescuentoTotal = ventas.Sum(v => v.Descuento),
             NumVentas = ventas.Count,
-            DesgloseDiario = GenerarDesglose(ventas, periodo, inicio, hoy),
+            DesgloseDiario = GenerarDesglose(ventas, inicio, hasta.Date),
             Ventas = ventas.Select(v => new VentaResumenDto
             {
                 Id = v.Id.ToString(),
@@ -131,16 +126,10 @@ public class AdminService(ForraDbContext db) : IAdminService
         };
     }
 
-    public async Task<ReporteCompletoDto> ObtenerReporteCompletoAsync(string? periodo)
+    public async Task<ReporteCompletoDto> ObtenerReporteCompletoAsync(DateTime desde, DateTime hasta)
     {
-        var hoy = DateTime.Today;
-        DateTime inicio = periodo?.ToLower() switch
-        {
-            "semana" => hoy.AddDays(-6),
-            "mes" => new DateTime(hoy.Year, hoy.Month, 1),
-            _ => hoy
-        };
-        var fin = hoy.AddDays(1);
+        var inicio = desde.Date;
+        var fin = hasta.Date.AddDays(1);
 
         var ventas = await db.Ventas
             .Include(v => v.Cliente)
@@ -237,13 +226,14 @@ public class AdminService(ForraDbContext db) : IAdminService
 
         return new ReporteCompletoDto
         {
-            Periodo = periodo ?? "hoy",
+            Desde = inicio,
+            Hasta = hasta.Date,
             GeneradoEn = DateTime.Now,
             TotalVentas = totalVentas,
             DescuentoTotal = descuentoTotal,
             NumVentas = numVentas,
             TicketPromedio = numVentas > 0 ? totalVentas / numVentas : 0,
-            DesgloseDiario = GenerarDesglose(ventas, periodo, inicio, hoy),
+            DesgloseDiario = GenerarDesglose(ventas, inicio, hasta.Date),
             TopProductos = topProductos,
             VentasPorCategoria = porCategoria,
             AlertasStock = alertas,
@@ -259,42 +249,47 @@ public class AdminService(ForraDbContext db) : IAdminService
         };
     }
 
-    private static List<DesgloseDiarioDto> GenerarDesglose(
-        List<Venta> ventas, string? periodo, DateTime inicio, DateTime hoy)
+    // Genera las barras del desglose según el tamaño del rango elegido: por hora
+    // si es un solo día, por día si cabe en una gráfica legible, o por semana si
+    // el rango es largo (ej. varios meses) para no saturar el PDF/la pantalla.
+    private static List<DesgloseDiarioDto> GenerarDesglose(List<Venta> ventas, DateTime desde, DateTime hasta)
     {
-        switch (periodo?.ToLower())
+        if (desde == hasta)
         {
-            case "semana":
-                var dias = new[] { "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom" };
-                return Enumerable.Range(0, 7).Select(i =>
-                {
-                    var fecha = inicio.AddDays(i);
-                    var diaIdx = ((int)fecha.DayOfWeek + 6) % 7;
-                    return new DesgloseDiarioDto
-                    {
-                        Etiqueta = dias[diaIdx],
-                        Total = ventas.Where(v => v.Fecha.Date == fecha).Sum(v => (decimal?)v.TotalFinal) ?? 0
-                    };
-                }).ToList();
-
-            case "mes":
-                var diasMes = (hoy - inicio).Days + 1;
-                return Enumerable.Range(0, diasMes).Select(i =>
-                {
-                    var fecha = inicio.AddDays(i);
-                    return new DesgloseDiarioDto
-                    {
-                        Etiqueta = fecha.ToString("dd/MM"),
-                        Total = ventas.Where(v => v.Fecha.Date == fecha).Sum(v => (decimal?)v.TotalFinal) ?? 0
-                    };
-                }).ToList();
-
-            default: // hoy
-                return Enumerable.Range(0, 24).Select(h => new DesgloseDiarioDto
-                {
-                    Etiqueta = $"{h:D2}:00",
-                    Total = ventas.Where(v => v.Fecha.Hour == h).Sum(v => (decimal?)v.TotalFinal) ?? 0
-                }).ToList();
+            return Enumerable.Range(0, 24).Select(h => new DesgloseDiarioDto
+            {
+                Etiqueta = $"{h:D2}:00",
+                Total = ventas.Where(v => v.Fecha.Date == desde && v.Fecha.Hour == h).Sum(v => (decimal?)v.TotalFinal) ?? 0
+            }).ToList();
         }
+
+        var totalDias = (hasta - desde).Days + 1;
+
+        if (totalDias <= 62)
+        {
+            return Enumerable.Range(0, totalDias).Select(i =>
+            {
+                var fecha = desde.AddDays(i);
+                return new DesgloseDiarioDto
+                {
+                    Etiqueta = fecha.ToString("dd/MM"),
+                    Total = ventas.Where(v => v.Fecha.Date == fecha).Sum(v => (decimal?)v.TotalFinal) ?? 0
+                };
+            }).ToList();
+        }
+
+        var semanas = new List<DesgloseDiarioDto>();
+        var cursor = desde;
+        while (cursor <= hasta)
+        {
+            var finSemana = cursor.AddDays(6) > hasta ? hasta : cursor.AddDays(6);
+            semanas.Add(new DesgloseDiarioDto
+            {
+                Etiqueta = $"{cursor:dd/MM}",
+                Total = ventas.Where(v => v.Fecha.Date >= cursor && v.Fecha.Date <= finSemana).Sum(v => (decimal?)v.TotalFinal) ?? 0
+            });
+            cursor = finSemana.AddDays(1);
+        }
+        return semanas;
     }
 }

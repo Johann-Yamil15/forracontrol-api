@@ -25,7 +25,7 @@ public class VentasController(IVentaService ventas) : ApiControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> ObtenerHistorial([FromQuery] int? idUsuario = null, [FromQuery] string periodo = "hoy")
+    public async Task<IActionResult> ObtenerHistorial([FromQuery] int? idUsuario = null, [FromQuery] string? periodo = null)
     {
         try
         {

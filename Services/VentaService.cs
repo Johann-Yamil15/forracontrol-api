@@ -109,9 +109,10 @@ public class VentaService(ForraDbContext db) : IVentaService
         var hoy = DateTime.Today;
         switch (periodo?.ToLower())
         {
+            case "hoy": return (hoy, hoy.AddDays(1));
             case "semana": return (hoy.AddDays(-6), hoy.AddDays(1));
             case "mes": return (new DateTime(hoy.Year, hoy.Month, 1), hoy.AddDays(1));
-            default: return (hoy, hoy.AddDays(1)); // hoy
+            default: return (DateTime.MinValue, DateTime.MaxValue); // todos
         }
     }
 }

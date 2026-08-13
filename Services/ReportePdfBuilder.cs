@@ -49,12 +49,11 @@ public static class ReportePdfBuilder
         return documento.GeneratePdf();
     }
 
-    private static string PeriodoLabel(string periodo) => periodo.ToLower() switch
+    private static string PeriodoLabel(ReporteCompletoDto r)
     {
-        "semana" => "Últimos 7 días",
-        "mes" => "Este mes",
-        _ => "Hoy",
-    };
+        if (r.Desde == r.Hasta) return r.Desde == DateTime.Today ? "Hoy" : r.Desde.ToString("dd/MM/yyyy");
+        return $"{r.Desde:dd/MM/yyyy} – {r.Hasta:dd/MM/yyyy}";
+    }
 
     private static void ComposeHeader(IContainer container, ReporteCompletoDto r)
     {
@@ -65,7 +64,7 @@ public static class ReportePdfBuilder
             row.RelativeItem().Column(col =>
             {
                 col.Item().Text("Forra Store").FontSize(20).Bold().FontColor(Colors.Blue.Darken2);
-                col.Item().Text($"Reporte de ventas — {PeriodoLabel(r.Periodo)}").FontSize(12).FontColor(Colors.Grey.Darken1);
+                col.Item().Text($"Reporte de ventas — {PeriodoLabel(r)}").FontSize(12).FontColor(Colors.Grey.Darken1);
             });
             row.ConstantItem(160).AlignRight().Text($"Generado: {r.GeneradoEn:dd/MM/yyyy HH:mm}").FontSize(9).FontColor(Colors.Grey.Medium);
         });

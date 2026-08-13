@@ -47,7 +47,8 @@ public class VentaResumenDto
 
 public class ReporteDto
 {
-    public string Periodo { get; set; } = "";
+    public DateTime Desde { get; set; }
+    public DateTime Hasta { get; set; }
     public decimal TotalVentas { get; set; }
     public decimal DescuentoTotal { get; set; }
     public int NumVentas { get; set; }
@@ -65,7 +66,8 @@ public class DesgloseDiarioDto
 
 public class ReporteCompletoDto
 {
-    public string Periodo { get; set; } = "";
+    public DateTime Desde { get; set; }
+    public DateTime Hasta { get; set; }
     public DateTime GeneradoEn { get; set; }
     public decimal TotalVentas { get; set; }
     public decimal DescuentoTotal { get; set; }
