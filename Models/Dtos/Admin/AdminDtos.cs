@@ -60,3 +60,38 @@ public class DesgloseDiarioDto
     public string Etiqueta { get; set; } = "";
     public decimal Total { get; set; }
 }
+
+// ─── Reporte completo (PDF) ────────────────────────────────────────────
+
+public class ReporteCompletoDto
+{
+    public string Periodo { get; set; } = "";
+    public DateTime GeneradoEn { get; set; }
+    public decimal TotalVentas { get; set; }
+    public decimal DescuentoTotal { get; set; }
+    public int NumVentas { get; set; }
+    public decimal TicketPromedio { get; set; }
+    public List<DesgloseDiarioDto> DesgloseDiario { get; set; } = new();
+    public List<TopProductoDto> TopProductos { get; set; } = new();
+    public List<VentaPorCategoriaDto> VentasPorCategoria { get; set; } = new();
+    public List<AlertaStockProductoDto> AlertasStock { get; set; } = new();
+    public List<InventarioItemDto> Inventario { get; set; } = new();
+    public List<VentaResumenDto> Ventas { get; set; } = new();
+}
+
+public class VentaPorCategoriaDto
+{
+    public string Categoria { get; set; } = "";
+    public int Cantidad { get; set; }
+    public decimal Total { get; set; }
+}
+
+public class InventarioItemDto
+{
+    public string NombreProducto { get; set; } = "";
+    public string Categoria { get; set; } = "";
+    public string Presentacion { get; set; } = "";
+    public int Stock { get; set; }
+    public int StockMinimo { get; set; }
+    public string Estado { get; set; } = ""; // "ok" | "alerta"
+}

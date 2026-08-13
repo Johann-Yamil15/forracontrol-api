@@ -6,6 +6,13 @@ FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 # sin privilegios de la imagen base no puede crear carpetas ahí dentro
 # (causaba UnauthorizedAccessException en /data/uploads). Corre como root
 # dentro del contenedor para poder escribir en el Volume montado.
+# libfontconfig1 + fonts-dejavu-core: QuestPDF (SkiaSharp) necesita fontconfig
+# y al menos una fuente instalada para poder renderizar los PDFs de reportes —
+# la imagen base no trae ninguna de las dos, y sin esto la generación de PDF
+# falla en Railway aunque funcione en local (Windows sí tiene fuentes).
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libfontconfig1 fonts-dejavu-core \
+    && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 # Railway asigna el puerto real via la variable de entorno PORT (ver Program.cs);
 # este EXPOSE es solo documentación para Docker.

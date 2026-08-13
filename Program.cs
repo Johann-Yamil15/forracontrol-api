@@ -6,6 +6,8 @@ using ForraControl.API.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Railway (y otros hosts) asignan el puerto dinámicamente via la variable de entorno PORT.
