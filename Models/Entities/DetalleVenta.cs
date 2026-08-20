@@ -10,6 +10,10 @@ public class DetalleVenta
     public decimal PrecioUnitario { get; set; }
     public decimal PrecioEfectivo { get; set; }
     public decimal Subtotal { get; set; }
+    // Copia de Presentacion.PrecioCosto al momento de la venta, para que la
+    // ganancia reportada no cambie retroactivamente si el costo del
+    // proveedor cambia después.
+    public decimal? PrecioCosto { get; set; }
 
     public Venta? Venta { get; set; }
     public Presentacion? Presentacion { get; set; }

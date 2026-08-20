@@ -107,6 +107,8 @@ public class AdminService(ForraDbContext db) : IAdminService
             .OrderByDescending(v => v.Fecha)
             .ToListAsync();
 
+        var ganancia = await ObtenerGananciaPorProductoAsync(inicio, fin);
+
         return new ReporteDto
         {
             Desde = inicio,
@@ -114,7 +116,9 @@ public class AdminService(ForraDbContext db) : IAdminService
             TotalVentas = ventas.Sum(v => v.TotalFinal),
             DescuentoTotal = ventas.Sum(v => v.Descuento),
             NumVentas = ventas.Count,
+            GananciaTotal = ganancia.Sum(g => g.Ganancia),
             DesgloseDiario = GenerarDesglose(ventas, inicio, hasta.Date),
+            GananciaPorProducto = ganancia,
             Ventas = ventas.Select(v => new VentaResumenDto
             {
                 Id = v.Id.ToString(),
@@ -185,6 +189,9 @@ public class AdminService(ForraDbContext db) : IAdminService
         foreach (var c in porCategoria.Where(c => string.IsNullOrEmpty(c.Categoria)))
             c.Categoria = "Sin categoría";
 
+        var gananciaPorProducto = await ObtenerGananciaPorProductoAsync(inicio, fin);
+        var gananciaTotal = gananciaPorProducto.Sum(x => x.Ganancia);
+
         // Alertas de stock (igual que dashboard)
         var presentacionesAlerta = await db.Presentaciones
             .Include(pr => pr.Producto)
@@ -233,9 +240,11 @@ public class AdminService(ForraDbContext db) : IAdminService
             DescuentoTotal = descuentoTotal,
             NumVentas = numVentas,
             TicketPromedio = numVentas > 0 ? totalVentas / numVentas : 0,
+            GananciaTotal = gananciaTotal,
             DesgloseDiario = GenerarDesglose(ventas, inicio, hasta.Date),
             TopProductos = topProductos,
             VentasPorCategoria = porCategoria,
+            GananciaPorProducto = gananciaPorProducto,
             AlertasStock = alertas,
             Inventario = inventario,
             Ventas = ventas.Select(v => new VentaResumenDto
@@ -247,6 +256,44 @@ public class AdminService(ForraDbContext db) : IAdminService
                 TotalFinal = v.TotalFinal
             }).ToList()
         };
+    }
+
+    // Ganancia por producto en el período. PrecioCosto se guarda por detalle
+    // al momento de vender — si no estaba capturado (presentación sin costo
+    // configurado, o venta registrada antes de tener este campo) se trata
+    // como 0, así que la ganancia mostrada es un piso, no siempre exacta.
+    // `fin` es exclusivo (igual que el resto de las consultas del período).
+    private async Task<List<GananciaProductoDto>> ObtenerGananciaPorProductoAsync(DateTime inicio, DateTime fin)
+    {
+        var gananciaRaw = await (from dv in db.DetallesVenta
+                                  join v in db.Ventas on dv.IdVenta equals v.Id
+                                  join pr in db.Presentaciones on dv.IdPresentacion equals pr.Id
+                                  join p in db.Productos on pr.IdProducto equals p.Id
+                                  where v.Fecha >= inicio && v.Fecha < fin
+                                  group new { dv, pr, p } by new { dv.IdPresentacion, pr.Unidad, pr.Tamano, p.Nombre } into g
+                                  select new
+                                  {
+                                      NombreProducto = g.Key.Nombre,
+                                      Unidad = g.Key.Unidad,
+                                      Tamano = g.Key.Tamano,
+                                      CantidadVendida = g.Sum(x => x.dv.Cantidad),
+                                      Ingreso = g.Sum(x => x.dv.Subtotal),
+                                      Costo = g.Sum(x => (x.dv.PrecioCosto ?? 0) * x.dv.Cantidad)
+                                  })
+                                  .ToListAsync();
+
+        return gananciaRaw
+            .Select(x => new GananciaProductoDto
+            {
+                NombreProducto = x.NombreProducto,
+                DescripcionPresentacion = ProductoService.Desc(x.Unidad, x.Tamano),
+                CantidadVendida = x.CantidadVendida,
+                Ingreso = x.Ingreso,
+                Costo = x.Costo,
+                Ganancia = x.Ingreso - x.Costo
+            })
+            .OrderByDescending(x => x.Ganancia)
+            .ToList();
     }
 
     // Genera las barras del desglose según el tamaño del rango elegido: por hora

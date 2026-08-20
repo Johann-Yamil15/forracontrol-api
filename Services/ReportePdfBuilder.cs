@@ -80,6 +80,7 @@ public static class ReportePdfBuilder
             col.Item().Element(c => ComposeDesglose(c, r));
             if (r.TopProductos.Count > 0) col.Item().Element(c => ComposeTopProductos(c, r));
             if (r.VentasPorCategoria.Count > 0) col.Item().Element(c => ComposeVentasPorCategoria(c, r));
+            if (r.GananciaPorProducto.Count > 0) col.Item().Element(c => ComposeGanancia(c, r));
             if (r.AlertasStock.Count > 0) col.Item().Element(c => ComposeAlertas(c, r));
             col.Item().Element(c => ComposeInventario(c, r));
             col.Item().Element(c => ComposeVentas(c, r));
@@ -97,6 +98,7 @@ public static class ReportePdfBuilder
             row.RelativeItem().Element(c => KpiCard(c, "Ventas", r.NumVentas.ToString(), Colors.Green.Darken2));
             row.RelativeItem().Element(c => KpiCard(c, "Ticket promedio", $"${r.TicketPromedio:0.00}", Colors.Orange.Darken2));
             row.RelativeItem().Element(c => KpiCard(c, "Descuentos", $"${r.DescuentoTotal:0.00}", Colors.Red.Darken2));
+            row.RelativeItem().Element(c => KpiCard(c, "Ganancia", $"${r.GananciaTotal:0.00}", Colors.Green.Darken2));
         });
     }
 
@@ -208,6 +210,46 @@ public static class ReportePdfBuilder
                     table.Cell().Element(BodyCell).Text(vc.Categoria);
                     table.Cell().Element(BodyCell).AlignRight().Text(vc.Cantidad.ToString());
                     table.Cell().Element(BodyCell).AlignRight().Text($"${vc.Total:0.00}");
+                }
+            });
+        });
+    }
+
+    private static void ComposeGanancia(IContainer container, ReporteCompletoDto r)
+    {
+        container.Column(col =>
+        {
+            col.Item().Text("Ganancia por producto").Bold().FontSize(13);
+            col.Item().PaddingTop(2).Text(
+                "Costo tomado del precio de proveedor capturado al momento de vender; los productos sin costo registrado se cuentan como $0 de costo.")
+                .FontSize(8).FontColor(Colors.Grey.Darken1);
+            col.Item().PaddingTop(6).Table(table =>
+            {
+                table.ColumnsDefinition(c =>
+                {
+                    c.RelativeColumn(3);
+                    c.RelativeColumn(2);
+                    c.RelativeColumn(1);
+                    c.RelativeColumn(1);
+                    c.RelativeColumn(1);
+                });
+
+                table.Header(h =>
+                {
+                    h.Cell().Element(HeaderCell).Text("Producto");
+                    h.Cell().Element(HeaderCell).Text("Presentación");
+                    h.Cell().Element(HeaderCell).AlignRight().Text("Ingreso");
+                    h.Cell().Element(HeaderCell).AlignRight().Text("Costo");
+                    h.Cell().Element(HeaderCell).AlignRight().Text("Ganancia");
+                });
+
+                foreach (var g in r.GananciaPorProducto)
+                {
+                    table.Cell().Element(BodyCell).Text(g.NombreProducto);
+                    table.Cell().Element(BodyCell).Text(g.DescripcionPresentacion);
+                    table.Cell().Element(BodyCell).AlignRight().Text($"${g.Ingreso:0.00}");
+                    table.Cell().Element(BodyCell).AlignRight().Text($"${g.Costo:0.00}");
+                    table.Cell().Element(BodyCell).AlignRight().Text($"${g.Ganancia:0.00}").FontColor(Colors.Green.Darken2);
                 }
             });
         });

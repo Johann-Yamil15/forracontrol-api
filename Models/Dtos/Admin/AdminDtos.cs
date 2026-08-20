@@ -52,7 +52,9 @@ public class ReporteDto
     public decimal TotalVentas { get; set; }
     public decimal DescuentoTotal { get; set; }
     public int NumVentas { get; set; }
+    public decimal GananciaTotal { get; set; }
     public List<DesgloseDiarioDto> DesgloseDiario { get; set; } = new();
+    public List<GananciaProductoDto> GananciaPorProducto { get; set; } = new();
     public List<VentaResumenDto> Ventas { get; set; } = new();
 }
 
@@ -73,12 +75,24 @@ public class ReporteCompletoDto
     public decimal DescuentoTotal { get; set; }
     public int NumVentas { get; set; }
     public decimal TicketPromedio { get; set; }
+    public decimal GananciaTotal { get; set; }
     public List<DesgloseDiarioDto> DesgloseDiario { get; set; } = new();
     public List<TopProductoDto> TopProductos { get; set; } = new();
     public List<VentaPorCategoriaDto> VentasPorCategoria { get; set; } = new();
+    public List<GananciaProductoDto> GananciaPorProducto { get; set; } = new();
     public List<AlertaStockProductoDto> AlertasStock { get; set; } = new();
     public List<InventarioItemDto> Inventario { get; set; } = new();
     public List<VentaResumenDto> Ventas { get; set; } = new();
+}
+
+public class GananciaProductoDto
+{
+    public string NombreProducto { get; set; } = "";
+    public string DescripcionPresentacion { get; set; } = "";
+    public int CantidadVendida { get; set; }
+    public decimal Ingreso { get; set; }
+    public decimal Costo { get; set; }
+    public decimal Ganancia { get; set; }
 }
 
 public class VentaPorCategoriaDto

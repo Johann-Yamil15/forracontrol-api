@@ -26,6 +26,10 @@ public class VentaService(ForraDbContext db) : IVentaService
 
         foreach (var item in request.Items)
         {
+            // Se busca antes de crear el detalle para poder copiar el costo
+            // del proveedor tal como estaba al momento de vender.
+            var pr = await db.Presentaciones.FindAsync(item.IdPresentacion);
+
             db.DetallesVenta.Add(new DetalleVenta
             {
                 IdVenta = venta.Id,
@@ -33,11 +37,11 @@ public class VentaService(ForraDbContext db) : IVentaService
                 Cantidad = item.Cantidad,
                 PrecioUnitario = item.PrecioUnitario,
                 PrecioEfectivo = item.PrecioEfectivo,
-                Subtotal = item.Subtotal
+                Subtotal = item.Subtotal,
+                PrecioCosto = pr?.PrecioCosto
             });
 
             // Descontar stock
-            var pr = await db.Presentaciones.FindAsync(item.IdPresentacion);
             if (pr != null)
                 pr.Stock -= item.Cantidad;
         }

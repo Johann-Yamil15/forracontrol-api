@@ -8,6 +8,10 @@ public class Presentacion
     public string Unidad { get; set; } = "";
     public decimal Tamano { get; set; }
     public decimal Precio { get; set; }
+    // Precio al que el proveedor deja la presentación — usado para calcular
+    // la ganancia en los reportes. Nullable: no todas las presentaciones lo
+    // tienen capturado todavía.
+    public decimal? PrecioCosto { get; set; }
     public int Stock { get; set; }
     public int StockMinimo { get; set; } = 5;
     public bool Activo { get; set; } = true;

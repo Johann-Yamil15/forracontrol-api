@@ -39,6 +39,7 @@ public class ForraDbContext(DbContextOptions<ForraDbContext> options) : DbContex
         {
             e.Property(p => p.Tamano).HasPrecision(10, 2);
             e.Property(p => p.Precio).HasPrecision(10, 2);
+            e.Property(p => p.PrecioCosto).HasPrecision(10, 2);
 
             e.HasOne(p => p.Producto)
                 .WithMany(p => p.Presentaciones)
@@ -110,6 +111,7 @@ public class ForraDbContext(DbContextOptions<ForraDbContext> options) : DbContex
             e.Property(d => d.PrecioUnitario).HasPrecision(10, 2);
             e.Property(d => d.PrecioEfectivo).HasPrecision(10, 2);
             e.Property(d => d.Subtotal).HasPrecision(10, 2);
+            e.Property(d => d.PrecioCosto).HasPrecision(10, 2);
 
             e.HasOne(d => d.Venta)
                 .WithMany(v => v.DetallesVenta)

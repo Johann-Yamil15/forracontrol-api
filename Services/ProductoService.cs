@@ -72,6 +72,7 @@ public class ProductoService(ForraDbContext db, IConfiguration configuration) : 
                 Tamano = pr.Tamano,
                 Cantidad = Desc(pr.Unidad, pr.Tamano),
                 Precio = pr.Precio,
+                PrecioCosto = pr.PrecioCosto,
                 Stock = pr.Stock,
                 StockMinimo = pr.StockMinimo,
                 EnAlerta = pr.Stock <= pr.StockMinimo
@@ -101,6 +102,7 @@ public class ProductoService(ForraDbContext db, IConfiguration configuration) : 
                     Unidad = pr.Unidad,
                     Tamano = pr.Tamano,
                     Precio = pr.Precio,
+                    PrecioCosto = pr.PrecioCosto,
                     Stock = pr.Stock,
                     StockMinimo = pr.StockMinimo,
                     Activo = true
@@ -146,6 +148,7 @@ public class ProductoService(ForraDbContext db, IConfiguration configuration) : 
             Unidad = request.Unidad,
             Tamano = request.Tamano,
             Precio = request.Precio,
+            PrecioCosto = request.PrecioCosto,
             Stock = request.Stock,
             StockMinimo = request.StockMinimo,
             Activo = true
@@ -163,6 +166,7 @@ public class ProductoService(ForraDbContext db, IConfiguration configuration) : 
         pr.Unidad = request.Unidad;
         pr.Tamano = request.Tamano;
         pr.Precio = request.Precio;
+        pr.PrecioCosto = request.PrecioCosto;
         pr.Stock = request.Stock;
         pr.StockMinimo = request.StockMinimo;
         await db.SaveChangesAsync();

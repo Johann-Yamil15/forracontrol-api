@@ -46,6 +46,7 @@ public class PresentacionAdminDto
     public decimal Tamano { get; set; }
     public string Cantidad { get; set; } = "";   // "Bulto 50" / "Kg" — calculado
     public decimal Precio { get; set; }
+    public decimal? PrecioCosto { get; set; }
     public int Stock { get; set; }
     public int StockMinimo { get; set; }
     public bool EnAlerta { get; set; }
@@ -77,6 +78,7 @@ public class CrearPresentacionRequest
     public string Unidad { get; set; } = "";
     public decimal Tamano { get; set; }
     public decimal Precio { get; set; }
+    public decimal? PrecioCosto { get; set; }
     public int Stock { get; set; }
     public int StockMinimo { get; set; }
 }
@@ -86,6 +88,7 @@ public class ActualizarPresentacionRequest
     public string Unidad { get; set; } = "";
     public decimal Tamano { get; set; }
     public decimal Precio { get; set; }
+    public decimal? PrecioCosto { get; set; }
     public int Stock { get; set; }
     public int StockMinimo { get; set; }
 }
