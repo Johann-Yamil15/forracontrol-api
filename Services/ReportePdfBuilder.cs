@@ -98,7 +98,8 @@ public static class ReportePdfBuilder
             row.RelativeItem().Element(c => KpiCard(c, "Ventas", r.NumVentas.ToString(), Colors.Green.Darken2));
             row.RelativeItem().Element(c => KpiCard(c, "Ticket promedio", $"${r.TicketPromedio:0.00}", Colors.Orange.Darken2));
             row.RelativeItem().Element(c => KpiCard(c, "Descuentos", $"${r.DescuentoTotal:0.00}", Colors.Red.Darken2));
-            row.RelativeItem().Element(c => KpiCard(c, "Ganancia", $"${r.GananciaTotal:0.00}", Colors.Green.Darken2));
+            row.RelativeItem().Element(c => KpiCard(c, "Ganancia", $"${r.GananciaTotal:0.00}",
+                r.GananciaTotal < 0 ? Colors.Red.Darken2 : Colors.Green.Darken2));
         });
     }
 
@@ -249,7 +250,8 @@ public static class ReportePdfBuilder
                     table.Cell().Element(BodyCell).Text(g.DescripcionPresentacion);
                     table.Cell().Element(BodyCell).AlignRight().Text($"${g.Ingreso:0.00}");
                     table.Cell().Element(BodyCell).AlignRight().Text($"${g.Costo:0.00}");
-                    table.Cell().Element(BodyCell).AlignRight().Text($"${g.Ganancia:0.00}").FontColor(Colors.Green.Darken2);
+                    table.Cell().Element(BodyCell).AlignRight().Text($"${g.Ganancia:0.00}")
+                        .FontColor(g.Ganancia < 0 ? Colors.Red.Darken2 : Colors.Green.Darken2);
                 }
             });
         });
