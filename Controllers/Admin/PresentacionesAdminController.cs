@@ -46,4 +46,35 @@ public class PresentacionesAdminController(IProductoService productos) : ApiCont
         }
         catch (Exception ex) { return Fail(ex.Message, StatusCodes.Status500InternalServerError); }
     }
+
+    [HttpPatch("{id:int}/stock-almacen")]
+    public async Task<IActionResult> AgregarStockAlmacen(int id, [FromBody] AgregarStockRequest? request)
+    {
+        if (request == null || request.Cantidad <= 0)
+            return Fail("La cantidad debe ser mayor a 0");
+        try
+        {
+            var stockAlmacenActual = await productos.AgregarStockAlmacenAsync(id, request.Cantidad);
+            if (stockAlmacenActual == null)
+                return Fail("Presentación no encontrada", StatusCodes.Status404NotFound);
+            return Ok(new { stockAlmacenActual });
+        }
+        catch (Exception ex) { return Fail(ex.Message, StatusCodes.Status500InternalServerError); }
+    }
+
+    [HttpPost("{id:int}/mover-a-tienda")]
+    public async Task<IActionResult> MoverATienda(int id, [FromBody] MoverAlmacenRequest? request)
+    {
+        if (request == null || request.Cantidad <= 0)
+            return Fail("La cantidad debe ser mayor a 0");
+        try
+        {
+            var resultado = await productos.MoverAlmacenATiendaAsync(id, request.Cantidad);
+            if (resultado == null)
+                return Fail("Presentación no encontrada", StatusCodes.Status404NotFound);
+            return Ok(new { stock = resultado.Value.stock, stockAlmacen = resultado.Value.stockAlmacen });
+        }
+        catch (InvalidOperationException ex) { return Fail(ex.Message); }
+        catch (Exception ex) { return Fail(ex.Message, StatusCodes.Status500InternalServerError); }
+    }
 }

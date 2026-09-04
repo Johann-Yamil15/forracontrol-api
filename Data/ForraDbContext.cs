@@ -55,6 +55,7 @@ public class ForraDbContext(DbContextOptions<ForraDbContext> options) : DbContex
             {
                 t.HasCheckConstraint("chk_presentaciones_precio", "precio >= 0");
                 t.HasCheckConstraint("chk_presentaciones_stock", "stock >= 0");
+                t.HasCheckConstraint("chk_presentaciones_stock_almacen", "stock_almacen >= 0");
                 t.HasCheckConstraint("chk_presentaciones_stock_minimo", "stock_minimo >= 0");
             });
         });

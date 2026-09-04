@@ -74,6 +74,7 @@ public class ProductoService(ForraDbContext db, IConfiguration configuration) : 
                 Precio = pr.Precio,
                 PrecioCosto = pr.PrecioCosto,
                 Stock = pr.Stock,
+                StockAlmacen = pr.StockAlmacen,
                 StockMinimo = pr.StockMinimo,
                 EnAlerta = pr.Stock <= pr.StockMinimo
             }).ToList()
@@ -104,6 +105,7 @@ public class ProductoService(ForraDbContext db, IConfiguration configuration) : 
                     Precio = pr.Precio,
                     PrecioCosto = pr.PrecioCosto,
                     Stock = pr.Stock,
+                    StockAlmacen = pr.StockAlmacen,
                     StockMinimo = pr.StockMinimo,
                     Activo = true
                 });
@@ -150,6 +152,7 @@ public class ProductoService(ForraDbContext db, IConfiguration configuration) : 
             Precio = request.Precio,
             PrecioCosto = request.PrecioCosto,
             Stock = request.Stock,
+            StockAlmacen = request.StockAlmacen,
             StockMinimo = request.StockMinimo,
             Activo = true
         };
@@ -193,6 +196,30 @@ public class ProductoService(ForraDbContext db, IConfiguration configuration) : 
         pr.Stock += cantidad;
         await db.SaveChangesAsync();
         return pr.Stock;
+    }
+
+    public async Task<int?> AgregarStockAlmacenAsync(int id, int cantidad)
+    {
+        var pr = await db.Presentaciones.FindAsync(id);
+        if (pr == null) return null;
+
+        pr.StockAlmacen += cantidad;
+        await db.SaveChangesAsync();
+        return pr.StockAlmacen;
+    }
+
+    public async Task<(int stock, int stockAlmacen)?> MoverAlmacenATiendaAsync(int id, int cantidad)
+    {
+        var pr = await db.Presentaciones.FindAsync(id);
+        if (pr == null) return null;
+
+        if (cantidad > pr.StockAlmacen)
+            throw new InvalidOperationException("No hay suficiente stock en almacén para mover esa cantidad");
+
+        pr.StockAlmacen -= cantidad;
+        pr.Stock += cantidad;
+        await db.SaveChangesAsync();
+        return (pr.Stock, pr.StockAlmacen);
     }
 
     private const long MaxImagenBytes = 5 * 1024 * 1024; // 5 MB

@@ -13,6 +13,10 @@ public class Presentacion
     // tienen capturado todavía.
     public decimal? PrecioCosto { get; set; }
     public int Stock { get; set; }
+    // Stock guardado en almacén, separado del de tienda — se mueve a Stock
+    // vía transferencia cuando se surte el aparador. No todo pasa por acá:
+    // a veces el proveedor entrega directo en tienda y se usa AgregarStockAsync.
+    public int StockAlmacen { get; set; }
     public int StockMinimo { get; set; } = 5;
     public bool Activo { get; set; } = true;
 

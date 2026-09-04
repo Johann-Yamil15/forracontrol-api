@@ -48,6 +48,7 @@ public class PresentacionAdminDto
     public decimal Precio { get; set; }
     public decimal? PrecioCosto { get; set; }
     public int Stock { get; set; }
+    public int StockAlmacen { get; set; }
     public int StockMinimo { get; set; }
     public bool EnAlerta { get; set; }
 }
@@ -80,6 +81,7 @@ public class CrearPresentacionRequest
     public decimal Precio { get; set; }
     public decimal? PrecioCosto { get; set; }
     public int Stock { get; set; }
+    public int StockAlmacen { get; set; }
     public int StockMinimo { get; set; }
 }
 
@@ -90,10 +92,18 @@ public class ActualizarPresentacionRequest
     public decimal Precio { get; set; }
     public decimal? PrecioCosto { get; set; }
     public int Stock { get; set; }
+    // StockAlmacen no se toca acá a propósito: el formulario general de
+    // edición no lo rastrea, así que si se incluyera se pisaría a 0 en cada
+    // guardado. Se maneja solo por los endpoints dedicados de almacén.
     public int StockMinimo { get; set; }
 }
 
 public class AgregarStockRequest
+{
+    public int Cantidad { get; set; }
+}
+
+public class MoverAlmacenRequest
 {
     public int Cantidad { get; set; }
 }
