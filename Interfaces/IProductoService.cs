@@ -20,6 +20,10 @@ public interface IProductoService
     /// no existe; lanza InvalidOperationException si no hay suficiente stock en almacén.
     Task<(int stock, int stockAlmacen)?> MoverAlmacenATiendaAsync(int id, int cantidad);
 
+    /// Marca si la presentación se guarda en almacén o no (algunas siempre
+    /// entregan directo en tienda). Devuelve false si no existe.
+    Task<bool> CambiarUsaAlmacenAsync(int id, bool activo);
+
     /// Valida, sanitiza (quita EXIF/GPS) y redimensiona la imagen, la guarda en
     /// disco y actualiza el producto. Devuelve la ruta relativa (ej. "/uploads/productos/xxx.jpg")
     /// o null si el producto no existe.

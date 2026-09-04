@@ -51,6 +51,7 @@ public class PresentacionAdminDto
     public int StockAlmacen { get; set; }
     public int StockMinimo { get; set; }
     public int StockMinimoAlmacen { get; set; }
+    public bool UsaAlmacen { get; set; }
     public bool EnAlerta { get; set; }
     public bool EnAlertaAlmacen { get; set; }
 }
@@ -112,4 +113,9 @@ public class AgregarStockRequest
 public class MoverAlmacenRequest
 {
     public int Cantidad { get; set; }
+}
+
+public class CambiarUsaAlmacenRequest
+{
+    public bool Activo { get; set; }
 }

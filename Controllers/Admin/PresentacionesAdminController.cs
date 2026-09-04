@@ -77,4 +77,17 @@ public class PresentacionesAdminController(IProductoService productos) : ApiCont
         catch (InvalidOperationException ex) { return Fail(ex.Message); }
         catch (Exception ex) { return Fail(ex.Message, StatusCodes.Status500InternalServerError); }
     }
+
+    [HttpPatch("{id:int}/usa-almacen")]
+    public async Task<IActionResult> CambiarUsaAlmacen(int id, [FromBody] CambiarUsaAlmacenRequest? request)
+    {
+        if (request == null) return Fail("Datos inválidos");
+        try
+        {
+            if (!await productos.CambiarUsaAlmacenAsync(id, request.Activo))
+                return Fail("Presentación no encontrada", StatusCodes.Status404NotFound);
+            return Ok<object?>(null);
+        }
+        catch (Exception ex) { return Fail(ex.Message, StatusCodes.Status500InternalServerError); }
+    }
 }

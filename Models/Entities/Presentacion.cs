@@ -19,6 +19,11 @@ public class Presentacion
     public int StockAlmacen { get; set; }
     public int StockMinimo { get; set; } = 5;
     public int StockMinimoAlmacen { get; set; } = 5;
+    // No todas las presentaciones se guardan en almacén (algunas siempre
+    // entregan directo en tienda) — arranca en false a propósito: solo
+    // algunos productos pasan por almacén, así que el admin activa cada uno
+    // manualmente en vez de tener que desactivar el resto uno por uno.
+    public bool UsaAlmacen { get; set; } = false;
     public bool Activo { get; set; } = true;
 
     public Producto? Producto { get; set; }

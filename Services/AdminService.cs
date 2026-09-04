@@ -227,7 +227,7 @@ public class AdminService(ForraDbContext db) : IAdminService
         var presentacionesAlerta = await db.Presentaciones
             .Include(pr => pr.Producto)
             .Where(pr => pr.Activo && pr.Producto!.Activo &&
-                (pr.Stock <= pr.StockMinimo || pr.StockAlmacen <= pr.StockMinimoAlmacen))
+                (pr.Stock <= pr.StockMinimo || (pr.UsaAlmacen && pr.StockAlmacen <= pr.StockMinimoAlmacen)))
             .OrderBy(pr => pr.Stock)
             .ToListAsync();
 
@@ -246,7 +246,7 @@ public class AdminService(ForraDbContext db) : IAdminService
                     StockAlmacen = pr.StockAlmacen,
                     StockMinimoAlmacen = pr.StockMinimoAlmacen,
                     AlertaTienda = pr.Stock <= pr.StockMinimo,
-                    AlertaAlmacen = pr.StockAlmacen <= pr.StockMinimoAlmacen
+                    AlertaAlmacen = pr.UsaAlmacen && pr.StockAlmacen <= pr.StockMinimoAlmacen
                 }).ToList()
             }).ToList();
     }

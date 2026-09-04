@@ -77,8 +77,9 @@ public class ProductoService(ForraDbContext db, IConfiguration configuration) : 
                 StockAlmacen = pr.StockAlmacen,
                 StockMinimo = pr.StockMinimo,
                 StockMinimoAlmacen = pr.StockMinimoAlmacen,
+                UsaAlmacen = pr.UsaAlmacen,
                 EnAlerta = pr.Stock <= pr.StockMinimo,
-                EnAlertaAlmacen = pr.StockAlmacen <= pr.StockMinimoAlmacen
+                EnAlertaAlmacen = pr.UsaAlmacen && pr.StockAlmacen <= pr.StockMinimoAlmacen
             }).ToList()
         });
     }
@@ -225,6 +226,16 @@ public class ProductoService(ForraDbContext db, IConfiguration configuration) : 
         pr.Stock += cantidad;
         await db.SaveChangesAsync();
         return (pr.Stock, pr.StockAlmacen);
+    }
+
+    public async Task<bool> CambiarUsaAlmacenAsync(int id, bool activo)
+    {
+        var pr = await db.Presentaciones.FindAsync(id);
+        if (pr == null) return false;
+
+        pr.UsaAlmacen = activo;
+        await db.SaveChangesAsync();
+        return true;
     }
 
     private const long MaxImagenBytes = 5 * 1024 * 1024; // 5 MB
