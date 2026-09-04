@@ -10,9 +10,14 @@ FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 # y al menos una fuente instalada para poder renderizar los PDFs de reportes —
 # la imagen base no trae ninguna de las dos, y sin esto la generación de PDF
 # falla en Railway aunque funcione en local (Windows sí tiene fuentes).
+# tzdata + TZ: Railway corre los contenedores en UTC. Todo el código usa
+# DateTime.Now como si fuera hora local del negocio (fecha de venta, cortes
+# de "hoy"/semana/mes en reportes) — sin esto, una venta a las 3pm en México
+# quedaba guardada como si fuera a las 9pm (UTC = local + 6h).
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends libfontconfig1 fonts-dejavu-core \
+    && apt-get install -y --no-install-recommends libfontconfig1 fonts-dejavu-core tzdata \
     && rm -rf /var/lib/apt/lists/*
+ENV TZ=America/Mexico_City
 WORKDIR /app
 # Railway asigna el puerto real via la variable de entorno PORT (ver Program.cs);
 # este EXPOSE es solo documentación para Docker.
