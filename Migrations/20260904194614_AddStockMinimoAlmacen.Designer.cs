@@ -3,6 +3,7 @@ using System;
 using ForraControl.API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ForraControl.API.Migrations
 {
     [DbContext(typeof(ForraDbContext))]
-    partial class ForraDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260904194614_AddStockMinimoAlmacen")]
+    partial class AddStockMinimoAlmacen
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

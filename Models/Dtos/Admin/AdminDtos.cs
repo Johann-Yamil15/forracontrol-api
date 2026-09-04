@@ -25,6 +25,10 @@ public class AlertaStockPresentacionDto
     public string Descripcion { get; set; } = "";
     public int Stock { get; set; }
     public int StockMinimo { get; set; }
+    public int StockAlmacen { get; set; }
+    public int StockMinimoAlmacen { get; set; }
+    public bool AlertaTienda { get; set; }
+    public bool AlertaAlmacen { get; set; }
 }
 
 public class TopProductoDto

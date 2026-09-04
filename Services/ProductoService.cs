@@ -76,7 +76,9 @@ public class ProductoService(ForraDbContext db, IConfiguration configuration) : 
                 Stock = pr.Stock,
                 StockAlmacen = pr.StockAlmacen,
                 StockMinimo = pr.StockMinimo,
-                EnAlerta = pr.Stock <= pr.StockMinimo
+                StockMinimoAlmacen = pr.StockMinimoAlmacen,
+                EnAlerta = pr.Stock <= pr.StockMinimo,
+                EnAlertaAlmacen = pr.StockAlmacen <= pr.StockMinimoAlmacen
             }).ToList()
         });
     }
@@ -107,6 +109,7 @@ public class ProductoService(ForraDbContext db, IConfiguration configuration) : 
                     Stock = pr.Stock,
                     StockAlmacen = pr.StockAlmacen,
                     StockMinimo = pr.StockMinimo,
+                    StockMinimoAlmacen = pr.StockMinimoAlmacen,
                     Activo = true
                 });
             }
@@ -154,6 +157,7 @@ public class ProductoService(ForraDbContext db, IConfiguration configuration) : 
             Stock = request.Stock,
             StockAlmacen = request.StockAlmacen,
             StockMinimo = request.StockMinimo,
+            StockMinimoAlmacen = request.StockMinimoAlmacen,
             Activo = true
         };
         db.Presentaciones.Add(presentacion);
@@ -172,6 +176,7 @@ public class ProductoService(ForraDbContext db, IConfiguration configuration) : 
         pr.PrecioCosto = request.PrecioCosto;
         pr.Stock = request.Stock;
         pr.StockMinimo = request.StockMinimo;
+        pr.StockMinimoAlmacen = request.StockMinimoAlmacen;
         await db.SaveChangesAsync();
         return true;
     }

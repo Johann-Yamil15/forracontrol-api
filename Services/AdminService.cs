@@ -22,27 +22,8 @@ public class AdminService(ForraDbContext db) : IAdminService
             .Where(v => v.Fecha >= semana && v.Fecha < manana)
             .SumAsync(v => (decimal?)v.TotalFinal) ?? 0;
 
-        // Alertas de stock
-        var presentacionesAlerta = await db.Presentaciones
-            .Include(pr => pr.Producto)
-            .Where(pr => pr.Activo && pr.Producto!.Activo && pr.Stock <= pr.StockMinimo)
-            .OrderBy(pr => pr.Stock)
-            .ToListAsync();
-
-        var alertas = presentacionesAlerta
-            .GroupBy(pr => pr.Producto!)
-            .Select(g => new AlertaStockProductoDto
-            {
-                IdProducto = g.Key.Id,
-                NombreProducto = g.Key.Nombre,
-                Presentaciones = g.Select(pr => new AlertaStockPresentacionDto
-                {
-                    IdPresentacion = pr.Id,
-                    Descripcion = ProductoService.Desc(pr.Unidad, pr.Tamano),
-                    Stock = pr.Stock,
-                    StockMinimo = pr.StockMinimo
-                }).ToList()
-            }).ToList();
+        // Alertas de stock (tienda y almacén)
+        var alertas = await ObtenerAlertasStockAsync();
 
         // Top 3 productos vendidos
         var top = await (from dv in db.DetallesVenta
@@ -192,27 +173,8 @@ public class AdminService(ForraDbContext db) : IAdminService
         var gananciaPorProducto = await ObtenerGananciaPorProductoAsync(inicio, fin);
         var gananciaTotal = gananciaPorProducto.Sum(x => x.Ganancia);
 
-        // Alertas de stock (igual que dashboard)
-        var presentacionesAlerta = await db.Presentaciones
-            .Include(pr => pr.Producto)
-            .Where(pr => pr.Activo && pr.Producto!.Activo && pr.Stock <= pr.StockMinimo)
-            .OrderBy(pr => pr.Stock)
-            .ToListAsync();
-
-        var alertas = presentacionesAlerta
-            .GroupBy(pr => pr.Producto!)
-            .Select(g => new AlertaStockProductoDto
-            {
-                IdProducto = g.Key.Id,
-                NombreProducto = g.Key.Nombre,
-                Presentaciones = g.Select(pr => new AlertaStockPresentacionDto
-                {
-                    IdPresentacion = pr.Id,
-                    Descripcion = ProductoService.Desc(pr.Unidad, pr.Tamano),
-                    Stock = pr.Stock,
-                    StockMinimo = pr.StockMinimo
-                }).ToList()
-            }).ToList();
+        // Alertas de stock (tienda y almacén)
+        var alertas = await ObtenerAlertasStockAsync();
 
         // Inventario completo (productos activos)
         var presentacionesActivas = await db.Presentaciones
@@ -256,6 +218,37 @@ public class AdminService(ForraDbContext db) : IAdminService
                 TotalFinal = v.TotalFinal
             }).ToList()
         };
+    }
+
+    // Presentaciones con stock bajo en tienda y/o en almacén, cada una con
+    // umbral configurable independiente. Usado por Dashboard y Reportes.
+    private async Task<List<AlertaStockProductoDto>> ObtenerAlertasStockAsync()
+    {
+        var presentacionesAlerta = await db.Presentaciones
+            .Include(pr => pr.Producto)
+            .Where(pr => pr.Activo && pr.Producto!.Activo &&
+                (pr.Stock <= pr.StockMinimo || pr.StockAlmacen <= pr.StockMinimoAlmacen))
+            .OrderBy(pr => pr.Stock)
+            .ToListAsync();
+
+        return presentacionesAlerta
+            .GroupBy(pr => pr.Producto!)
+            .Select(g => new AlertaStockProductoDto
+            {
+                IdProducto = g.Key.Id,
+                NombreProducto = g.Key.Nombre,
+                Presentaciones = g.Select(pr => new AlertaStockPresentacionDto
+                {
+                    IdPresentacion = pr.Id,
+                    Descripcion = ProductoService.Desc(pr.Unidad, pr.Tamano),
+                    Stock = pr.Stock,
+                    StockMinimo = pr.StockMinimo,
+                    StockAlmacen = pr.StockAlmacen,
+                    StockMinimoAlmacen = pr.StockMinimoAlmacen,
+                    AlertaTienda = pr.Stock <= pr.StockMinimo,
+                    AlertaAlmacen = pr.StockAlmacen <= pr.StockMinimoAlmacen
+                }).ToList()
+            }).ToList();
     }
 
     // Ganancia por producto en el período. PrecioCosto se guarda por detalle

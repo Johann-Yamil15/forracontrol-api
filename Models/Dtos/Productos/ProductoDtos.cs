@@ -50,7 +50,9 @@ public class PresentacionAdminDto
     public int Stock { get; set; }
     public int StockAlmacen { get; set; }
     public int StockMinimo { get; set; }
+    public int StockMinimoAlmacen { get; set; }
     public bool EnAlerta { get; set; }
+    public bool EnAlertaAlmacen { get; set; }
 }
 
 public class CrearProductoRequest
@@ -83,6 +85,7 @@ public class CrearPresentacionRequest
     public int Stock { get; set; }
     public int StockAlmacen { get; set; }
     public int StockMinimo { get; set; }
+    public int StockMinimoAlmacen { get; set; }
 }
 
 public class ActualizarPresentacionRequest
@@ -95,7 +98,10 @@ public class ActualizarPresentacionRequest
     // StockAlmacen no se toca acá a propósito: el formulario general de
     // edición no lo rastrea, así que si se incluyera se pisaría a 0 en cada
     // guardado. Se maneja solo por los endpoints dedicados de almacén.
+    // StockMinimoAlmacen sí es seguro incluirlo: es un umbral configurado a
+    // propósito por el admin, no una cantidad viva que se mueve sola.
     public int StockMinimo { get; set; }
+    public int StockMinimoAlmacen { get; set; }
 }
 
 public class AgregarStockRequest

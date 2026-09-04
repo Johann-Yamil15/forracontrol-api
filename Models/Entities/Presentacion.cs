@@ -18,6 +18,7 @@ public class Presentacion
     // a veces el proveedor entrega directo en tienda y se usa AgregarStockAsync.
     public int StockAlmacen { get; set; }
     public int StockMinimo { get; set; } = 5;
+    public int StockMinimoAlmacen { get; set; } = 5;
     public bool Activo { get; set; } = true;
 
     public Producto? Producto { get; set; }
