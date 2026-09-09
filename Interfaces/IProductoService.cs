@@ -9,9 +9,21 @@ public interface IProductoService
     Task<IEnumerable<ProductoAdminDto>> ObtenerTodosAdminAsync();
     Task<int> CrearAsync(CrearProductoRequest request);
     Task<bool> ActualizarAsync(int id, ActualizarProductoRequest request);
+
+    /// Da de baja el producto (Activo = false) sin borrarlo: conserva su
+    /// historial de ventas. Devuelve false si no existe.
     Task<bool> EliminarAsync(int id);
+
+    /// Reactiva un producto dado de baja (Activo = true). Devuelve false si
+    /// no existe.
+    Task<bool> ReactivarAsync(int id);
+
     Task<int> AgregarPresentacionAsync(int idProducto, CrearPresentacionRequest request);
     Task<bool> ActualizarPresentacionAsync(int id, ActualizarPresentacionRequest request);
+
+    /// Da de baja la presentación (Activo = false) sin borrarla: si alguna
+    /// tiene ventas asociadas, un borrado físico violaría la FK. Devuelve
+    /// false si no existe.
     Task<bool> EliminarPresentacionAsync(int id);
     Task<int?> AgregarStockAsync(int id, int cantidad);
     Task<int?> AgregarStockAlmacenAsync(int id, int cantidad);

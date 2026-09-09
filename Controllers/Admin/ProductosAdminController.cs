@@ -53,6 +53,18 @@ public class ProductosAdminController(IProductoService productos) : ApiControlle
         catch (Exception ex) { return Fail(ex.Message, StatusCodes.Status500InternalServerError); }
     }
 
+    [HttpPatch("{id:int}/reactivar")]
+    public async Task<IActionResult> Reactivar(int id)
+    {
+        try
+        {
+            if (!await productos.ReactivarAsync(id))
+                return Fail("Producto no encontrado", StatusCodes.Status404NotFound);
+            return Ok<object?>(null);
+        }
+        catch (Exception ex) { return Fail(ex.Message, StatusCodes.Status500InternalServerError); }
+    }
+
     [HttpPost("{idProducto:int}/presentaciones")]
     public async Task<IActionResult> AgregarPresentacion(int idProducto, [FromBody] CrearPresentacionRequest? request)
     {

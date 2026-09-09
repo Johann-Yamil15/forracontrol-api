@@ -65,7 +65,7 @@ public class ProductoService(ForraDbContext db, IConfiguration configuration) : 
             Uso = p.Uso ?? "",
             ImagenUrl = p.ImagenUrl ?? "",
             Activo = p.Activo,
-            Presentaciones = p.Presentaciones.Select(pr => new PresentacionAdminDto
+            Presentaciones = p.Presentaciones.Where(pr => pr.Activo).Select(pr => new PresentacionAdminDto
             {
                 Id = pr.Id,
                 Unidad = pr.Unidad,
@@ -146,6 +146,16 @@ public class ProductoService(ForraDbContext db, IConfiguration configuration) : 
         return true;
     }
 
+    public async Task<bool> ReactivarAsync(int id)
+    {
+        var producto = await db.Productos.FindAsync(id);
+        if (producto == null) return false;
+
+        producto.Activo = true;
+        await db.SaveChangesAsync();
+        return true;
+    }
+
     public async Task<int> AgregarPresentacionAsync(int idProducto, CrearPresentacionRequest request)
     {
         var presentacion = new Presentacion
@@ -187,9 +197,7 @@ public class ProductoService(ForraDbContext db, IConfiguration configuration) : 
         var pr = await db.Presentaciones.FindAsync(id);
         if (pr == null) return false;
 
-        var precios = await db.PreciosEspeciales.Where(p => p.IdPresentacion == id).ToListAsync();
-        db.PreciosEspeciales.RemoveRange(precios);
-        db.Presentaciones.Remove(pr);
+        pr.Activo = false;
         await db.SaveChangesAsync();
         return true;
     }
