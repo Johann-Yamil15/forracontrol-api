@@ -50,8 +50,8 @@ public class PresentacionesAdminController(IProductoService productos) : ApiCont
     [HttpPatch("{id:int}/stock-almacen")]
     public async Task<IActionResult> AgregarStockAlmacen(int id, [FromBody] AgregarStockRequest? request)
     {
-        if (request == null || request.Cantidad <= 0)
-            return Fail("La cantidad debe ser mayor a 0");
+        if (request == null || request.Cantidad == 0)
+            return Fail("La cantidad no puede ser 0");
         try
         {
             var stockAlmacenActual = await productos.AgregarStockAlmacenAsync(id, request.Cantidad);
@@ -59,6 +59,7 @@ public class PresentacionesAdminController(IProductoService productos) : ApiCont
                 return Fail("Presentación no encontrada", StatusCodes.Status404NotFound);
             return Ok(new { stockAlmacenActual });
         }
+        catch (InvalidOperationException ex) { return Fail(ex.Message); }
         catch (Exception ex) { return Fail(ex.Message, StatusCodes.Status500InternalServerError); }
     }
 

@@ -26,6 +26,11 @@ public interface IProductoService
     /// false si no existe.
     Task<bool> EliminarPresentacionAsync(int id);
     Task<int?> AgregarStockAsync(int id, int cantidad);
+
+    /// Suma (o resta, si cantidad es negativa — sirve para corregir un
+    /// exceso capturado por error) al stock de almacén. Devuelve null si la
+    /// presentación no existe; lanza InvalidOperationException si el
+    /// resultado quedaría negativo.
     Task<int?> AgregarStockAlmacenAsync(int id, int cantidad);
 
     /// Transfiere cantidad de almacén a tienda. Devuelve null si la presentación

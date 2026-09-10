@@ -217,6 +217,9 @@ public class ProductoService(ForraDbContext db, IConfiguration configuration) : 
         var pr = await db.Presentaciones.FindAsync(id);
         if (pr == null) return null;
 
+        if (pr.StockAlmacen + cantidad < 0)
+            throw new InvalidOperationException("No hay suficiente stock en almacén para restar esa cantidad");
+
         pr.StockAlmacen += cantidad;
         await db.SaveChangesAsync();
         return pr.StockAlmacen;
